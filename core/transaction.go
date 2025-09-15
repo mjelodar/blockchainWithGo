@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/PRACTICING-GO/blockchain/crypto"
-	"github.com/PRACTICING-GO/blockchain/types"
 
 	"io"
 )

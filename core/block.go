@@ -1,9 +1,6 @@
 package core
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/binary"
 	"github.com/PRACTICING-GO/blockchain/crypto"
 	"github.com/PRACTICING-GO/blockchain/types"
 	"io"
@@ -12,7 +9,7 @@ import (
 type Header struct {
 	Version       uint32 `json:"version"`
 	Height        uint32 `json:"height"`
-	TimeStamp     uint64 `json:"timestamp"`
+	TimeStamp     int64  `json:"timestamp"`
 	PrevBlockHash types.Hash
 	MerkleRoot    types.Hash
 	Nonce         uint64 `json:"nonce"`
