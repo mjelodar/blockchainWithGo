@@ -1,9 +1,9 @@
 package core
 
 import (
-	"github.com/PRACTICING-GO/blockchain/crypto"
+	"fmt"
 
-	"io"
+	"github.com/PRACTICING-GO/blockchain/crypto"
 )
 
 type Transaction struct {
@@ -13,12 +13,25 @@ type Transaction struct {
 	Signature crypto.Signature
 }
 
-func (t *Transaction) EncodeBinary(w io.Writer) error {
-	// Implement encoding logic here
+func (tx *Transaction) Sign(privkey crypto.PrivateKey) error {
+	sig, err := privkey.Sign(tx.data)
+	if err != nil {
+		return err
+	}
+	tx.Signature = sig
+	tx.Validator = privkey.PublicKey()
 	return nil
 }
 
-func (t *Transaction) DecodeBinary(r io.Reader) error {
-	// Implement decoding logic here
+func (tx *Transaction) Verify() error {
+	var zeroSig crypto.Signature
+	if tx.Signature == zeroSig {
+		return fmt.Errorf("missing signature")
+	}
+
+	if !tx.Signature.Verify(tx.Validator, tx.data) {
+		return fmt.Errorf("invalid signature")
+	}
+
 	return nil
 }
