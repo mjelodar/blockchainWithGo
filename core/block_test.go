@@ -1,11 +1,12 @@
 package core
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/PRACTICING-GO/blockchain/crypto"
 	"github.com/PRACTICING-GO/blockchain/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func randomBlock(height uint32) *Block {
@@ -26,7 +27,23 @@ func randomBlock(height uint32) *Block {
 	}
 }
 
-func TestHashBlock(t *testing.T) {
+func TestSignBlock(t *testing.T) {
 	block := randomBlock(0)
-	fmt.Println(block.Hash(BlockHasher{}))
+	privKey := crypto.GeneratePrivateKey()
+	assert.Nil(t, block.Sign(privKey))
+	assert.NotNil(t, block.Signature)
+}
+
+func TestVerifyBlock(t *testing.T) {
+	block := randomBlock(0)
+	privKey := crypto.GeneratePrivateKey()
+	assert.Nil(t, block.Sign(privKey))
+	assert.Nil(t, block.Verify())
+
+	otherPrivKey := crypto.GeneratePrivateKey()
+	block.Validator = otherPrivKey.PublicKey()
+	assert.NotNil(t, block.Verify())
+	// Tamper with the block to make the signature invalid
+	block.Header.Height = 1
+	assert.NotNil(t, block.Verify())
 }

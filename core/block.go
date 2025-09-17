@@ -1,9 +1,13 @@
 package core
 
 import (
+	"bytes"
+	"encoding/gob"
+	"fmt"
+	"io"
+
 	"github.com/PRACTICING-GO/blockchain/crypto"
 	"github.com/PRACTICING-GO/blockchain/types"
-	"io"
 )
 
 type Header struct {
@@ -36,4 +40,36 @@ func (b *Block) Encode(writer io.Writer, enc Encoder[Block]) error {
 
 func (b *Block) Decode(reader io.Reader, dec Decoder[Block]) error {
 	return dec.Decode(reader, *b)
+}
+
+func (b *Block) Sign(privkey crypto.PrivateKey) error {
+	sig, err := privkey.Sign(b.HeaderBytes())
+	if err != nil {
+		return err
+	}
+	b.Signature = sig
+	b.Validator = privkey.PublicKey()
+	return nil
+}
+
+func (b *Block) Verify() error {
+	var zeroSig crypto.Signature
+	if b.Signature == zeroSig {
+		return nil // Genesis block
+	}
+
+	if !b.Signature.Verify(b.Validator, b.HeaderBytes()) {
+		return fmt.Errorf("invalid block signature")
+	}
+
+	return nil
+}
+
+func (blk *Block) HeaderBytes() []byte {
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
+	if err := enc.Encode(blk.Header); err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
 }
